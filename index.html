@@ -1,1 +1,154 @@
 
+ try{
+
+  await signInWithEmailAndPassword(
+   auth,
+   userEmail,
+   userPassword
+  );
+
+  authMessage.innerText =
+  "Login successful!";
+
+ }catch(error){
+
+  authMessage.innerText =
+  getErrorMessage(error.code);
+}
+
+});
+
+
+/* LOGOUT */
+
+document.getElementById("logoutBtn")
+.addEventListener("click", async () => {
+
+ try{
+
+  await signOut(auth);
+
+ }catch(error){
+
+  alert("Logout failed. Please try again.");
+
+ }
+
+});
+
+
+/* AUTH STATE */
+
+onAuthStateChanged(auth, (user) => {
+
+ if(user){
+
+  authSection.classList.add("hidden");
+  userSection.classList.remove("hidden");
+  appSection.classList.remove("hidden");
+
+  document.getElementById("userInfo")
+  .innerText = "Account active";
+
+ }else{
+
+  authSection.classList.remove("hidden");
+  userSection.classList.add("hidden");
+  appSection.classList.add("hidden");
+
+ }
+
+});
+
+
+/* ERROR MESSAGES */
+
+function getErrorMessage(code){
+
+ const errors = {
+
+  "auth/email-already-in-use":
+  "This email is already registered.",
+
+  "auth/invalid-email":
+  "Please enter a valid email.",
+
+  "auth/weak-password":
+  "Password must contain at least 6 characters.",
+
+  "auth/invalid-credential":
+  "Incorrect email or password.",
+
+  "auth/network-request-failed":
+  "Network error. Check your internet."
+
+ };
+
+ return errors[code] || "Something went wrong. Please try again.";
+
+}
+
+
+/* GENERATE CLIPS - DEMO */
+
+document.getElementById("generateBtn")
+.addEventListener("click", () => {
+
+ const link =
+ document.getElementById("videoLink").value.trim();
+ const file =
+ document.getElementById("videoFile").files[0];
+
+ const count =
+ Number(document.getElementById("clipCount").value);
+
+ const duration =
+ document.getElementById("duration").value;
+
+ const status =
+ document.getElementById("status");
+
+ const results =
+ document.getElementById("results");
+
+ results.innerHTML = "";
+
+ if(!link && !file){
+
+  status.innerText =
+  "Please paste a video link or upload a video.";
+
+  return;
+
+ }
+
+ if(link && !file){
+
+  status.innerText =
+  "YouTube link received. Video processing service is not connected yet.";
+
+  return;
+
+ }
+
+ status.innerText =
+ "Demo preview created. AI video processing is not connected yet.";
+
+ for(let i=1; i<=count; i++){
+
+  results.innerHTML += `
+   <div class="clip">
+    <b>Clip ${i}</b>
+    <p>Duration: ${duration}</p>
+    <p>Waiting for AI video processing service.</p>
+   </div>
+  `;
+
+ }
+
+});
+
+</script>
+
+</body>
+ </html>
