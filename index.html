@@ -1,3 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClipMaster AI</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#0b0b16;
+ color:white;
+}
+
+header{
+ padding:22px;
+ text-align:center;
+ background:#17152b;
+ border-bottom:1px solid #333;
+}
+
+.logo{
+ font-size:28px;
+ font-weight:bold;
+ color:#a78bfa;
+}
+
+.container{
+ max-width:650px;
+ margin:30px auto;
+ padding:20px;
+}
+
+h1{text-align:center}
+
+.sub{
+ text-align:center;
+ color:#aaa;
+ line-height:1.6;
+}
+
+.card{
+ background:#17172a;
+ border:1px solid #34334d;
+ padding:22px;
+ border-radius:16px;
+ margin-top:22px;
+}
+
+label{
+ display:block;
+ margin:15px 0 8px;
+}
+
+input,select{
+ width:100%;
+ padding:14px;
+ border-radius:9px;
+ border:1px solid #45435f;
+ background:#0d0d1b;
+ color:white;
+ font-size:15px;
+}
+
+button{
+ width:100%;
+ padding:14px;
+ margin-top:15px;
+ border:0;
+ border-radius:9px;
+ background:#8155ed;
+ color:white;
+ font-size:16px;
+ font-weight:bold;
+ cursor:pointer;
+}button:hover{background:#6840cb}
+
+.secondary{background:#292840}
+
+#status,#authMessage{
+ text-align:center;
+ color:#c4b5fd;
+ margin-top:15px;
+ line-height:1.5;
+}
+
+.hidden{display:none}
+
+.clip{
+ background:#24233a;
+ padding:15px;
+ border-radius:10px;
+ margin-top:12px;
+}
+
+.userbar{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:10px;
+ flex-wrap:wrap;
+ color:#c4b5fd;
+}
+
+.userbar button{
+ width:auto;
+ margin:0;
+ padding:10px 18px;
+}
+
+footer{
+ text-align:center;
+ color:#777;
+ padding:30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">✂ ClipMaster AI</div>
+ <p>Turn Long Videos Into Short Clips</p>
+</header>
+
+<div class="container">
+
+<h1>Create AI Short Clips</h1>
+
+<p class="sub">
+Turn your long videos into short-form content.
+Login to use ClipMaster AI.
+</p>
+
+<!-- AUTH SECTION -->
+
+<div class="card" id="authSection">
+
+<h2>Account Login</h2>
+
+<label>Email Address</label>
+<input id="email" type="email"
+placeholder="Enter your email">
+
+<label>Password</label>
+<input id="password" type="password"
+placeholder="Enter password">
+
+<button id="signupBtn">Create Account</button>
+
+<button id="loginBtn" class="secondary">
+Login
+</button>
+
+<div id="authMessage"></div>
+
+</div>
+
+<!-- USER SECTION -->
+
+<div class="card hidden" id="userSection">
+
+<div class="userbar">
+ <span id="userInfo">Logged in</span>
+ <button id="logoutBtn" class="secondary">
+ Logout
+ </button>
+</div>
+
+</div>
+
+<!-- VIDEO SECTION -->
+
+<div class="card hidden" id="appSection">
+
+<h2>Generate Your Clips</h2>
+
+<label>YouTube Video Link</label>
+<input id="videoLink" type="url"
+placeholder="Paste video URL">
+
+<label>Or Upload Your Video</label>
+<input id="videoFile" type="file"
+accept="video/*">
+
+<label>Number of Clips</label>
+<select id="clipCount">
+ <option value="4">4 Clips</option>
+ <option value="5" selected>5 Clips</option>
+ <option value="10">10 Clips</option>
+</select>
+
+<label>Clip Duration</label>
+<select id="duration">
+ <option>30 Seconds</option>
+ <option>45 Seconds</option>
+ <option>60 Seconds</option>
+</select>
+
+<button id="generateBtn">
+Generate My Clips ✨
+</button>
+
+<div id="status"></div>
+<div id="results"></div>
+
+</div>
+</div>
+
+<footer>
+ClipMaster AI © 2026
+</footer>
+
+<!-- FIREBASE -->
+
+<script type="module">import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+import {
+ getAuth,
+ createUserWithEmailAndPassword,
+ signInWithEmailAndPassword,
+ signOut,
+ onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+
+/* FIREBASE CONFIG */
+
+const firebaseConfig = {
+ apiKey: "AIzaSyAih--XZoXbBDmkEvwTpOaEoDzQuXjDLVk",
+ authDomain: "my-brother-7f8d9.firebaseapp.com",
+ projectId: "my-brother-7f8d9",
+ storageBucket: "my-brother-7f8d9.firebasestorage.app",
+ messagingSenderId: "212397225304",
+ appId: "1:212397225304:web:982962c29fea86e890212d",
+ measurementId: "G-EJ4S8999D8"
+};
+
+
+/* INITIALIZE FIREBASE */
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+
+/* HTML ELEMENTS */
+
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+
+const authMessage =
+document.getElementById("authMessage");
+
+const authSection =
+document.getElementById("authSection");
+
+const userSection =
+document.getElementById("userSection");
+
+const appSection =
+document.getElementById("appSection");
+
+
+/* SIGNUP */
+
+document.getElementById("signupBtn")
+.addEventListener("click", async () => {
+
+ const userEmail = email.value.trim();
+ const userPassword = password.value;
+
+ if(!userEmail || !userPassword){
+  authMessage.innerText =
+  "Please enter email and password.";
+  return;
+ }
+
+ try{
+
+  await createUserWithEmailAndPassword(
+   auth,
+   userEmail,
+   userPassword
+  );
+
+  authMessage.innerText =
+  "Account created successfully!";
+
+ }catch(error){
+
+  authMessage.innerText =
+  getErrorMessage(error.code);
+
+ }
+
+});
+
+
+/* LOGIN */
+
+document.getElementById("loginBtn")
+.addEventListener("click", async () => {
+
+ const userEmail = email.value.trim();
+ const userPassword = password.value;
+
+ if(!userEmail || !userPassword){
+  authMessage.innerText =
+  "Please enter email and password.";
+  return;
+ }
 
  try{
 
@@ -14,7 +330,8 @@
 
   authMessage.innerText =
   getErrorMessage(error.code);
-}
+
+ }
 
 });
 
@@ -42,7 +359,6 @@ document.getElementById("logoutBtn")
 onAuthStateChanged(auth, (user) => {
 
  if(user){
-
   authSection.classList.add("hidden");
   userSection.classList.remove("hidden");
   appSection.classList.remove("hidden");
@@ -96,6 +412,7 @@ document.getElementById("generateBtn")
 
  const link =
  document.getElementById("videoLink").value.trim();
+
  const file =
  document.getElementById("videoFile").files[0];
 
@@ -151,4 +468,4 @@ document.getElementById("generateBtn")
 </script>
 
 </body>
- </html>
+</html>
